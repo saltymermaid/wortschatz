@@ -29,11 +29,11 @@ const elements = {
     // Navigation
     navButtons: document.querySelectorAll('.nav-button'),
     sections: document.querySelectorAll('.section'),
-    
+
     // Tabs
     tabButtons: document.querySelectorAll('.tab-button'),
     tabContents: document.querySelectorAll('.tab-content'),
-    
+
     // Gender Word Input
     genderForm: document.getElementById('gender-form'),
     genderWordInput: document.getElementById('gender-word'),
@@ -42,7 +42,7 @@ const elements = {
     clearGenderListBtn: document.getElementById('clear-gender-list'),
     exportGenderListBtn: document.getElementById('export-gender-list'),
     genderCsvUpload: document.getElementById('gender-csv-upload'),
-    
+
     // Plural A Word Input
     pluralAForm: document.getElementById('plural-a-form'),
     pluralASingularInput: document.getElementById('plural-a-singular'),
@@ -52,7 +52,7 @@ const elements = {
     clearPluralAListBtn: document.getElementById('clear-plural-a-list'),
     exportPluralAListBtn: document.getElementById('export-plural-a-list'),
     pluralACsvUpload: document.getElementById('plural-a-csv-upload'),
-    
+
     // Plural B Word Input
     pluralBForm: document.getElementById('plural-b-form'),
     pluralBSingularInput: document.getElementById('plural-b-singular'),
@@ -62,7 +62,7 @@ const elements = {
     clearPluralBListBtn: document.getElementById('clear-plural-b-list'),
     exportPluralBListBtn: document.getElementById('export-plural-b-list'),
     pluralBCsvUpload: document.getElementById('plural-b-csv-upload'),
-    
+
     // Gender Exercise
     currentGenderWord: document.getElementById('current-gender-word'),
     genderDropZones: document.querySelectorAll('#gender-exercise-section .drop-target'),
@@ -72,7 +72,7 @@ const elements = {
     genderProgress: document.getElementById('gender-progress'),
     genderScore: document.getElementById('gender-score'),
     genderProgressFill: document.getElementById('gender-progress-fill'),
-    
+
     // Plural A Exercise
     currentPluralAWord: document.getElementById('current-plural-a-word'),
     pluralADropZones: document.querySelectorAll('#plural-exercise-a .drop-target'),
@@ -82,7 +82,7 @@ const elements = {
     pluralAProgress: document.getElementById('plural-a-progress'),
     pluralAScore: document.getElementById('plural-a-score'),
     pluralAProgressFill: document.getElementById('plural-a-progress-fill'),
-    
+
     // Plural B Exercise
     currentPluralBWord: document.getElementById('current-plural-b-word'),
     pluralBDropZones: document.querySelectorAll('#plural-exercise-b .drop-target'),
@@ -92,7 +92,7 @@ const elements = {
     pluralBProgress: document.getElementById('plural-b-progress'),
     pluralBScore: document.getElementById('plural-b-score'),
     pluralBProgressFill: document.getElementById('plural-b-progress-fill'),
-    
+
     // Reset Data
     resetDataBtn: document.getElementById('reset-data')
 };
@@ -101,13 +101,13 @@ const elements = {
 function initApp() {
     // Load data from localStorage
     loadFromLocalStorage();
-    
+
     // Set up event listeners
     setupEventListeners();
-    
+
     // Render initial word lists
     renderWordLists();
-    
+
     // Initialize exercises
     initializeExercises();
 }
@@ -117,57 +117,111 @@ function setupEventListeners() {
     elements.navButtons.forEach(button => {
         button.addEventListener('click', handleNavigation);
     });
-    
+
     // Tabs
     elements.tabButtons.forEach(button => {
         button.addEventListener('click', handleTabSwitch);
     });
-    
+
     // Gender Word Input
     elements.genderForm.addEventListener('submit', handleGenderWordSubmit);
     elements.clearGenderListBtn.addEventListener('click', clearGenderWordList);
     elements.exportGenderListBtn.addEventListener('click', exportGenderWordList);
     elements.genderCsvUpload.addEventListener('change', handleGenderCsvUpload);
-    
+
+    // Add keyboard navigation for gender dropdown
+    elements.genderArticleInput.addEventListener('keydown', handleDropdownKeyNavigation);
+
     // Plural A Word Input
     elements.pluralAForm.addEventListener('submit', handlePluralAWordSubmit);
     elements.clearPluralAListBtn.addEventListener('click', clearPluralAWordList);
     elements.exportPluralAListBtn.addEventListener('click', exportPluralAWordList);
     elements.pluralACsvUpload.addEventListener('change', handlePluralACsvUpload);
-    
+
+    // Add keyboard navigation for plural A category dropdown
+    elements.pluralACategoryInput.addEventListener('keydown', handleDropdownKeyNavigation);
+
     // Plural B Word Input
     elements.pluralBForm.addEventListener('submit', handlePluralBWordSubmit);
     elements.clearPluralBListBtn.addEventListener('click', clearPluralBWordList);
     elements.exportPluralBListBtn.addEventListener('click', exportPluralBWordList);
     elements.pluralBCsvUpload.addEventListener('change', handlePluralBCsvUpload);
-    
+
+    // Add keyboard navigation for plural B category dropdown
+    elements.pluralBCategoryInput.addEventListener('keydown', handleDropdownKeyNavigation);
+
     // Gender Exercise
     elements.currentGenderWord.addEventListener('dragstart', handleDragStart);
-    elements.genderDropZones.forEach(zone => {
+    elements.currentGenderWord.addEventListener('keydown', handleGenderWordKeydown);
+    elements.genderDropZones.forEach((zone, index) => {
         zone.addEventListener('dragover', handleDragOver);
         zone.addEventListener('dragleave', handleDragLeave);
         zone.addEventListener('drop', handleGenderDrop);
+        // Make drop zones focusable
+        zone.setAttribute('tabindex', '0');
+        // Add keyboard event listeners
+        zone.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                // Simulate drop when Enter or Space is pressed
+                const currentWord = document.getElementById('current-gender-word');
+                if (currentWord.textContent) {
+                    const gender = zone.parentElement.getAttribute('data-gender');
+                    handleGenderSelection(gender);
+                }
+            }
+        });
     });
     elements.genderNextBtn.addEventListener('click', loadNextGenderWord);
-    
+
     // Plural A Exercise
     elements.currentPluralAWord.addEventListener('dragstart', handleDragStart);
-    elements.pluralADropZones.forEach(zone => {
+    elements.currentPluralAWord.addEventListener('keydown', handlePluralAWordKeydown);
+    elements.pluralADropZones.forEach((zone, index) => {
         zone.addEventListener('dragover', handleDragOver);
         zone.addEventListener('dragleave', handleDragLeave);
         zone.addEventListener('drop', handlePluralADrop);
+        // Make drop zones focusable
+        zone.setAttribute('tabindex', '0');
+        // Add keyboard event listeners
+        zone.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                // Simulate drop when Enter or Space is pressed
+                const currentWord = document.getElementById('current-plural-a-word');
+                if (currentWord.textContent) {
+                    const category = zone.parentElement.getAttribute('data-category');
+                    handlePluralASelection(category);
+                }
+            }
+        });
     });
     elements.pluralANextBtn.addEventListener('click', loadNextPluralAWord);
-    
+
     // Plural B Exercise
     elements.currentPluralBWord.addEventListener('dragstart', handleDragStart);
-    elements.pluralBDropZones.forEach(zone => {
+    elements.currentPluralBWord.addEventListener('keydown', handlePluralBWordKeydown);
+    elements.pluralBDropZones.forEach((zone, index) => {
         zone.addEventListener('dragover', handleDragOver);
         zone.addEventListener('dragleave', handleDragLeave);
         zone.addEventListener('drop', handlePluralBDrop);
+        // Make drop zones focusable
+        zone.setAttribute('tabindex', '0');
+        // Add keyboard event listeners
+        zone.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                // Simulate drop when Enter or Space is pressed
+                const currentWord = document.getElementById('current-plural-b-word');
+                if (currentWord.textContent) {
+                    const category = zone.parentElement.getAttribute('data-category');
+                    handlePluralBSelection(category);
+                }
+            }
+        });
     });
     elements.pluralBNextBtn.addEventListener('click', loadNextPluralBWord);
-    
+
     // Reset Data
     elements.resetDataBtn.addEventListener('click', confirmResetData);
 }
@@ -175,18 +229,18 @@ function setupEventListeners() {
 // Navigation between sections
 function handleNavigation(event) {
     const targetId = event.target.id.replace('nav-', '');
-    
+
     // Update active nav button
     elements.navButtons.forEach(button => {
         button.classList.remove('active');
     });
     event.target.classList.add('active');
-    
+
     // Show target section, hide others
     elements.sections.forEach(section => {
         section.classList.remove('active');
     });
-    
+
     // Map the targetId to the correct section ID
     let sectionId;
     if (targetId === 'input') {
@@ -196,9 +250,9 @@ function handleNavigation(event) {
     } else if (targetId === 'plural') {
         sectionId = 'plural-exercise-section';
     }
-    
+
     document.getElementById(sectionId).classList.add('active');
-    
+
     // Initialize exercise if navigating to an exercise section
     if (targetId === 'gender') {
         if (appData.genderWords.length > 0) {
@@ -231,20 +285,20 @@ function handleNavigation(event) {
 function handleTabSwitch(event) {
     const tabGroup = event.target.closest('.tabs');
     const targetTab = event.target.dataset.tab;
-    
+
     // Update active tab button
     tabGroup.querySelectorAll('.tab-button').forEach(button => {
         button.classList.remove('active');
     });
     event.target.classList.add('active');
-    
+
     // Show target tab content, hide others
     const tabContents = tabGroup.parentElement.querySelectorAll('.tab-content');
     tabContents.forEach(content => {
         content.classList.remove('active');
     });
     document.getElementById(targetTab).classList.add('active');
-    
+
     // Initialize exercise if switching to a plural exercise tab
     if (targetTab === 'plural-exercise-a') {
         if (appData.pluralWordsA.length > 0) {
@@ -265,10 +319,10 @@ function handleTabSwitch(event) {
 // Gender Word Input
 function handleGenderWordSubmit(event) {
     event.preventDefault();
-    
+
     const word = elements.genderWordInput.value.trim();
     const gender = elements.genderArticleInput.value;
-    
+
     if (word) {
         addGenderWord(word, gender);
         elements.genderWordInput.value = '';
@@ -284,20 +338,20 @@ function addGenderWord(word, gender) {
 
 function renderGenderWordList() {
     elements.genderWordList.innerHTML = '';
-    
+
     appData.genderWords.forEach((item, index) => {
         const li = document.createElement('li');
         li.innerHTML = `
             <span>${item.gender} ${item.word}</span>
             <button type="button" data-index="${index}">×</button>
         `;
-        
+
         li.querySelector('button').addEventListener('click', () => {
             appData.genderWords.splice(index, 1);
             saveToLocalStorage();
             renderGenderWordList();
         });
-        
+
         elements.genderWordList.appendChild(li);
     });
 }
@@ -322,7 +376,7 @@ function handleGenderCsvUpload(event) {
         reader.onload = function(e) {
             const content = e.target.result;
             const lines = content.split('\n');
-            
+
             lines.forEach(line => {
                 const [word, gender] = line.split(',').map(item => item.trim());
                 if (word && gender && ['der', 'die', 'das'].includes(gender)) {
@@ -338,11 +392,11 @@ function handleGenderCsvUpload(event) {
 // Plural A Word Input
 function handlePluralAWordSubmit(event) {
     event.preventDefault();
-    
+
     const singular = elements.pluralASingularInput.value.trim();
     const plural = elements.pluralAPluralInput.value.trim();
     const category = elements.pluralACategoryInput.value;
-    
+
     if (singular && plural) {
         addPluralAWord(singular, plural, category);
         elements.pluralASingularInput.value = '';
@@ -359,20 +413,20 @@ function addPluralAWord(singular, plural, category) {
 
 function renderPluralAWordList() {
     elements.pluralAWordList.innerHTML = '';
-    
+
     appData.pluralWordsA.forEach((item, index) => {
         const li = document.createElement('li');
         li.innerHTML = `
             <span>${item.singular} → ${item.plural} (${getCategoryLabel(item.category)})</span>
             <button type="button" data-index="${index}">×</button>
         `;
-        
+
         li.querySelector('button').addEventListener('click', () => {
             appData.pluralWordsA.splice(index, 1);
             saveToLocalStorage();
             renderPluralAWordList();
         });
-        
+
         elements.pluralAWordList.appendChild(li);
     });
 }
@@ -397,7 +451,7 @@ function handlePluralACsvUpload(event) {
         reader.onload = function(e) {
             const content = e.target.result;
             const lines = content.split('\n');
-            
+
             lines.forEach(line => {
                 const [singular, plural, category] = line.split(',').map(item => item.trim());
                 if (singular && plural && ['no-change', 'add-e', 'add-s'].includes(category)) {
@@ -413,11 +467,11 @@ function handlePluralACsvUpload(event) {
 // Plural B Word Input
 function handlePluralBWordSubmit(event) {
     event.preventDefault();
-    
+
     const singular = elements.pluralBSingularInput.value.trim();
     const plural = elements.pluralBPluralInput.value.trim();
     const category = elements.pluralBCategoryInput.value;
-    
+
     if (singular && plural) {
         addPluralBWord(singular, plural, category);
         elements.pluralBSingularInput.value = '';
@@ -434,20 +488,20 @@ function addPluralBWord(singular, plural, category) {
 
 function renderPluralBWordList() {
     elements.pluralBWordList.innerHTML = '';
-    
+
     appData.pluralWordsB.forEach((item, index) => {
         const li = document.createElement('li');
         li.innerHTML = `
             <span>${item.singular} → ${item.plural} (${getCategoryLabel(item.category)})</span>
             <button type="button" data-index="${index}">×</button>
         `;
-        
+
         li.querySelector('button').addEventListener('click', () => {
             appData.pluralWordsB.splice(index, 1);
             saveToLocalStorage();
             renderPluralBWordList();
         });
-        
+
         elements.pluralBWordList.appendChild(li);
     });
 }
@@ -472,7 +526,7 @@ function handlePluralBCsvUpload(event) {
         reader.onload = function(e) {
             const content = e.target.result;
             const lines = content.split('\n');
-            
+
             lines.forEach(line => {
                 const [singular, plural, category] = line.split(',').map(item => item.trim());
                 if (singular && plural && ['add-e-umlaut', 'add-er-umlaut', 'add-en'].includes(category)) {
@@ -495,14 +549,45 @@ function getCategoryLabel(category) {
         'add-er-umlaut': 'Add -er + umlaut',
         'add-en': 'Add -(e)n'
     };
-    
+
     return labels[category] || category;
+}
+
+// Handle keyboard navigation for dropdowns
+function handleDropdownKeyNavigation(event) {
+    const dropdown = event.target;
+
+    // Handle arrow keys
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault(); // Prevent default scrolling
+
+        const options = dropdown.options;
+        const currentIndex = dropdown.selectedIndex;
+
+        // Calculate new index based on arrow key
+        let newIndex;
+        if (event.key === 'ArrowDown') {
+            newIndex = (currentIndex + 1) % options.length;
+        } else { // ArrowUp
+            newIndex = (currentIndex - 1 + options.length) % options.length;
+        }
+
+        // Set the new selected option
+        dropdown.selectedIndex = newIndex;
+    }
+    // Space or Enter key to open dropdown (not needed in most browsers but added for consistency)
+    else if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
+        // Simulate a mouse click to open the dropdown
+        const clickEvent = new MouseEvent('mousedown');
+        dropdown.dispatchEvent(clickEvent);
+    }
 }
 // Drag and Drop Functionality
 function handleDragStart(event) {
     event.dataTransfer.setData('text/plain', event.target.id);
     event.dataTransfer.effectAllowed = 'move';
-    
+
     setTimeout(() => {
         event.target.classList.add('dragging');
     }, 0);
@@ -524,20 +609,20 @@ function initializeExercises() {
     shuffleArray(appData.genderWords);
     shuffleArray(appData.pluralWordsA);
     shuffleArray(appData.pluralWordsB);
-    
+
     // Reset exercise state
     appData.currentExercise.gender.currentWordIndex = 0;
     appData.currentExercise.gender.correctCount = 0;
     appData.currentExercise.gender.totalAttempts = 0;
-    
+
     appData.currentExercise.pluralA.currentWordIndex = 0;
     appData.currentExercise.pluralA.correctCount = 0;
     appData.currentExercise.pluralA.totalAttempts = 0;
-    
+
     appData.currentExercise.pluralB.currentWordIndex = 0;
     appData.currentExercise.pluralB.correctCount = 0;
     appData.currentExercise.pluralB.totalAttempts = 0;
-    
+
     saveToLocalStorage();
 }
 
@@ -549,73 +634,98 @@ function loadNextGenderWord() {
     elements.genderFeedbackMessage.textContent = '';
     elements.genderFeedbackMessage.classList.remove('correct', 'incorrect');
     elements.genderNextBtn.style.display = 'none';
-    
+
     // Check if we have words
     if (appData.genderWords.length === 0) {
         elements.currentGenderWord.textContent = 'No words available';
         elements.genderFeedbackMessage.textContent = 'Please add words in the Word Lists section';
         return;
     }
-    
+
     // Check if we've gone through all words
     if (appData.currentExercise.gender.currentWordIndex >= appData.genderWords.length) {
         // Reshuffle and start over
         shuffleArray(appData.genderWords);
         appData.currentExercise.gender.currentWordIndex = 0;
     }
-    
+
     // Get current word
     const currentWord = appData.genderWords[appData.currentExercise.gender.currentWordIndex];
-    
+
     // Display word (without article)
     elements.currentGenderWord.textContent = currentWord.word.toUpperCase();
     elements.currentGenderWord.dataset.gender = currentWord.gender;
-    
+
     // Update progress
     updateGenderProgress();
 }
 
 function handleGenderDrop(event) {
     event.preventDefault();
-    
+
     // Remove drag-over class
     event.target.classList.remove('drag-over');
-    
-    // Get dropped element
-    const draggedElementId = event.dataTransfer.getData('text/plain');
-    const draggedElement = document.getElementById(draggedElementId);
-    
-    // Get correct gender from data attribute
-    const correctGender = draggedElement.dataset.gender;
-    
+
     // Get selected gender from drop zone
     const selectedGender = event.target.parentElement.dataset.gender;
-    
+
+    // Handle the selection
+    handleGenderSelection(selectedGender);
+}
+
+// Handle gender selection (used by both drag-drop and keyboard)
+function handleGenderSelection(selectedGender) {
+    // Get current word
+    const currentWord = appData.genderWords[appData.currentExercise.gender.currentWordIndex];
+    const correctGender = currentWord.gender;
+
     // Check if correct
     const isCorrect = correctGender === selectedGender;
-    
+
+    // Find the drop zone that was selected
+    const selectedDropZone = document.querySelector(`.drop-zone[data-gender="${selectedGender}"] .drop-target`);
+    if (selectedDropZone) {
+        selectedDropZone.classList.add(isCorrect ? 'correct' : 'incorrect');
+    }
+
     // Update UI
-    event.target.classList.add(isCorrect ? 'correct' : 'incorrect');
-    elements.genderFeedbackMessage.textContent = isCorrect 
-        ? 'Correct! 👍' 
+    elements.genderFeedbackMessage.textContent = isCorrect
+        ? 'Correct! 👍'
         : `Incorrect. The correct answer is "${correctGender}".`;
     elements.genderFeedbackMessage.classList.add(isCorrect ? 'correct' : 'incorrect');
     elements.genderNextBtn.style.display = 'inline-block';
-    
+
     // Update stats
     appData.currentExercise.gender.totalAttempts++;
     if (isCorrect) {
         appData.currentExercise.gender.correctCount++;
     }
-    
+
     // Move to next word
     appData.currentExercise.gender.currentWordIndex++;
-    
+
     // Save progress
     saveToLocalStorage();
-    
+
     // Update progress display
     updateGenderProgress();
+}
+
+// Handle keyboard navigation for gender word
+function handleGenderWordKeydown(event) {
+    // Tab key is handled by the browser for focus navigation
+
+    // Arrow keys to navigate between drop zones
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft' ||
+        event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+
+        // Find the first drop zone and focus on it
+        const dropZones = document.querySelectorAll('#gender-exercise-section .drop-target');
+        if (dropZones.length > 0) {
+            dropZones[0].focus();
+        }
+    }
 }
 
 function updateGenderProgress() {
@@ -624,7 +734,7 @@ function updateGenderProgress() {
     const score = appData.currentExercise.gender.correctCount;
     const attempts = appData.currentExercise.gender.totalAttempts;
     const percentage = attempts > 0 ? Math.round((score / attempts) * 100) : 0;
-    
+
     elements.genderProgress.textContent = `${current}/${total}`;
     elements.genderScore.textContent = `Score: ${score}/${attempts} (${percentage}%)`;
     elements.genderProgressFill.style.width = `${(current / total) * 100}%`;
@@ -639,73 +749,98 @@ function loadNextPluralAWord() {
     elements.pluralAFeedbackMessage.textContent = '';
     elements.pluralAFeedbackMessage.classList.remove('correct', 'incorrect');
     elements.pluralANextBtn.style.display = 'none';
-    
+
     // Check if we have words
     if (appData.pluralWordsA.length === 0) {
         elements.currentPluralAWord.textContent = 'No words available';
         elements.pluralAFeedbackMessage.textContent = 'Please add words in the Word Lists section';
         return;
     }
-    
+
     // Check if we've gone through all words
     if (appData.currentExercise.pluralA.currentWordIndex >= appData.pluralWordsA.length) {
         // Reshuffle and start over
         shuffleArray(appData.pluralWordsA);
         appData.currentExercise.pluralA.currentWordIndex = 0;
     }
-    
+
     // Get current word
     const currentWord = appData.pluralWordsA[appData.currentExercise.pluralA.currentWordIndex];
-    
+
     // Display word
     elements.currentPluralAWord.textContent = currentWord.singular.toUpperCase();
     elements.currentPluralAWord.dataset.category = currentWord.category;
-    
+
     // Update progress
     updatePluralAProgress();
 }
 
 function handlePluralADrop(event) {
     event.preventDefault();
-    
+
     // Remove drag-over class
     event.target.classList.remove('drag-over');
-    
-    // Get dropped element
-    const draggedElementId = event.dataTransfer.getData('text/plain');
-    const draggedElement = document.getElementById(draggedElementId);
-    
-    // Get correct category from data attribute
-    const correctCategory = draggedElement.dataset.category;
-    
+
     // Get selected category from drop zone
     const selectedCategory = event.target.parentElement.dataset.category;
-    
+
+    // Handle the selection
+    handlePluralASelection(selectedCategory);
+}
+
+// Handle plural A selection (used by both drag-drop and keyboard)
+function handlePluralASelection(selectedCategory) {
+    // Get current word
+    const currentWord = appData.pluralWordsA[appData.currentExercise.pluralA.currentWordIndex];
+    const correctCategory = currentWord.category;
+
     // Check if correct
     const isCorrect = correctCategory === selectedCategory;
-    
+
+    // Find the drop zone that was selected
+    const selectedDropZone = document.querySelector(`.drop-zone[data-category="${selectedCategory}"] .drop-target`);
+    if (selectedDropZone) {
+        selectedDropZone.classList.add(isCorrect ? 'correct' : 'incorrect');
+    }
+
     // Update UI
-    event.target.classList.add(isCorrect ? 'correct' : 'incorrect');
-    elements.pluralAFeedbackMessage.textContent = isCorrect 
-        ? 'Correct! 👍' 
+    elements.pluralAFeedbackMessage.textContent = isCorrect
+        ? 'Correct! 👍'
         : `Incorrect. The correct answer is "${getCategoryLabel(correctCategory)}".`;
     elements.pluralAFeedbackMessage.classList.add(isCorrect ? 'correct' : 'incorrect');
     elements.pluralANextBtn.style.display = 'inline-block';
-    
+
     // Update stats
     appData.currentExercise.pluralA.totalAttempts++;
     if (isCorrect) {
         appData.currentExercise.pluralA.correctCount++;
     }
-    
+
     // Move to next word
     appData.currentExercise.pluralA.currentWordIndex++;
-    
+
     // Save progress
     saveToLocalStorage();
-    
+
     // Update progress display
     updatePluralAProgress();
+}
+
+// Handle keyboard navigation for plural A word
+function handlePluralAWordKeydown(event) {
+    // Tab key is handled by the browser for focus navigation
+
+    // Arrow keys to navigate between drop zones
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft' ||
+        event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+
+        // Find the first drop zone and focus on it
+        const dropZones = document.querySelectorAll('#plural-exercise-a .drop-target');
+        if (dropZones.length > 0) {
+            dropZones[0].focus();
+        }
+    }
 }
 
 function updatePluralAProgress() {
@@ -714,7 +849,7 @@ function updatePluralAProgress() {
     const score = appData.currentExercise.pluralA.correctCount;
     const attempts = appData.currentExercise.pluralA.totalAttempts;
     const percentage = attempts > 0 ? Math.round((score / attempts) * 100) : 0;
-    
+
     elements.pluralAProgress.textContent = `${current}/${total}`;
     elements.pluralAScore.textContent = `Score: ${score}/${attempts} (${percentage}%)`;
     elements.pluralAProgressFill.style.width = `${(current / total) * 100}%`;
@@ -729,73 +864,98 @@ function loadNextPluralBWord() {
     elements.pluralBFeedbackMessage.textContent = '';
     elements.pluralBFeedbackMessage.classList.remove('correct', 'incorrect');
     elements.pluralBNextBtn.style.display = 'none';
-    
+
     // Check if we have words
     if (appData.pluralWordsB.length === 0) {
         elements.currentPluralBWord.textContent = 'No words available';
         elements.pluralBFeedbackMessage.textContent = 'Please add words in the Word Lists section';
         return;
     }
-    
+
     // Check if we've gone through all words
     if (appData.currentExercise.pluralB.currentWordIndex >= appData.pluralWordsB.length) {
         // Reshuffle and start over
         shuffleArray(appData.pluralWordsB);
         appData.currentExercise.pluralB.currentWordIndex = 0;
     }
-    
+
     // Get current word
     const currentWord = appData.pluralWordsB[appData.currentExercise.pluralB.currentWordIndex];
-    
+
     // Display word
     elements.currentPluralBWord.textContent = currentWord.singular.toUpperCase();
     elements.currentPluralBWord.dataset.category = currentWord.category;
-    
+
     // Update progress
     updatePluralBProgress();
 }
 
 function handlePluralBDrop(event) {
     event.preventDefault();
-    
+
     // Remove drag-over class
     event.target.classList.remove('drag-over');
-    
-    // Get dropped element
-    const draggedElementId = event.dataTransfer.getData('text/plain');
-    const draggedElement = document.getElementById(draggedElementId);
-    
-    // Get correct category from data attribute
-    const correctCategory = draggedElement.dataset.category;
-    
+
     // Get selected category from drop zone
     const selectedCategory = event.target.parentElement.dataset.category;
-    
+
+    // Handle the selection
+    handlePluralBSelection(selectedCategory);
+}
+
+// Handle plural B selection (used by both drag-drop and keyboard)
+function handlePluralBSelection(selectedCategory) {
+    // Get current word
+    const currentWord = appData.pluralWordsB[appData.currentExercise.pluralB.currentWordIndex];
+    const correctCategory = currentWord.category;
+
     // Check if correct
     const isCorrect = correctCategory === selectedCategory;
-    
+
+    // Find the drop zone that was selected
+    const selectedDropZone = document.querySelector(`.drop-zone[data-category="${selectedCategory}"] .drop-target`);
+    if (selectedDropZone) {
+        selectedDropZone.classList.add(isCorrect ? 'correct' : 'incorrect');
+    }
+
     // Update UI
-    event.target.classList.add(isCorrect ? 'correct' : 'incorrect');
-    elements.pluralBFeedbackMessage.textContent = isCorrect 
-        ? 'Correct! 👍' 
+    elements.pluralBFeedbackMessage.textContent = isCorrect
+        ? 'Correct! 👍'
         : `Incorrect. The correct answer is "${getCategoryLabel(correctCategory)}".`;
     elements.pluralBFeedbackMessage.classList.add(isCorrect ? 'correct' : 'incorrect');
     elements.pluralBNextBtn.style.display = 'inline-block';
-    
+
     // Update stats
     appData.currentExercise.pluralB.totalAttempts++;
     if (isCorrect) {
         appData.currentExercise.pluralB.correctCount++;
     }
-    
+
     // Move to next word
     appData.currentExercise.pluralB.currentWordIndex++;
-    
+
     // Save progress
     saveToLocalStorage();
-    
+
     // Update progress display
     updatePluralBProgress();
+}
+
+// Handle keyboard navigation for plural B word
+function handlePluralBWordKeydown(event) {
+    // Tab key is handled by the browser for focus navigation
+
+    // Arrow keys to navigate between drop zones
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft' ||
+        event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+
+        // Find the first drop zone and focus on it
+        const dropZones = document.querySelectorAll('#plural-exercise-b .drop-target');
+        if (dropZones.length > 0) {
+            dropZones[0].focus();
+        }
+    }
 }
 
 function updatePluralBProgress() {
@@ -804,7 +964,7 @@ function updatePluralBProgress() {
     const score = appData.currentExercise.pluralB.correctCount;
     const attempts = appData.currentExercise.pluralB.totalAttempts;
     const percentage = attempts > 0 ? Math.round((score / attempts) * 100) : 0;
-    
+
     elements.pluralBProgress.textContent = `${current}/${total}`;
     elements.pluralBScore.textContent = `Score: ${score}/${attempts} (${percentage}%)`;
     elements.pluralBProgressFill.style.width = `${(current / total) * 100}%`;
@@ -823,12 +983,12 @@ function loadFromLocalStorage() {
         const savedData = localStorage.getItem('germanDrillData');
         if (savedData) {
             const parsedData = JSON.parse(savedData);
-            
+
             // Update appData with saved data
             appData.genderWords = parsedData.genderWords || [];
             appData.pluralWordsA = parsedData.pluralWordsA || [];
             appData.pluralWordsB = parsedData.pluralWordsB || [];
-            
+
             if (parsedData.currentExercise) {
                 appData.currentExercise = parsedData.currentExercise;
             }
@@ -850,13 +1010,13 @@ function shuffleArray(array) {
 function downloadCSV(content, filename) {
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
-    
+
     // Create download link
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
     link.setAttribute('download', filename);
     link.style.visibility = 'hidden';
-    
+
     // Add to document, click, and remove
     document.body.appendChild(link);
     link.click();

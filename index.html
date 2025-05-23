@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="German Language Drill App for practicing gender and plural forms">
+    <meta name="theme-color" content="#4285f4">
+    <title>Wortschatz</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Wortschatz</h1>
+            <nav>
+                <button id="nav-input" class="nav-button active">Word Lists</button>
+                <button id="nav-gender" class="nav-button">Gender Exercise</button>
+                <button id="nav-plural" class="nav-button">Plural Exercise</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Word Input Section -->
+            <section id="word-input-section" class="section active">
+                <h2>Manage Your Word Lists</h2>
+                
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="gender-input">Gender Words</button>
+                    <button class="tab-button" data-tab="plural-input-a">Plural Words (Group A)</button>
+                    <button class="tab-button" data-tab="plural-input-b">Plural Words (Group B)</button>
+                </div>
+                
+                <!-- Gender Words Input -->
+                <div id="gender-input" class="tab-content active">
+                    <h3>Gender Words</h3>
+                    <p>Enter words with their correct gender (e.g., "Hund,der")</p>
+                    
+                    <form id="gender-form" class="input-form">
+                        <div class="form-group">
+                            <label for="gender-word">Word:</label>
+                            <input type="text" id="gender-word" placeholder="e.g., Hund" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender-article">Gender:</label>
+                            <select id="gender-article" required>
+                                <option value="der">der (masculine)</option>
+                                <option value="die">die (feminine)</option>
+                                <option value="das">das (neuter)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="primary-button">Add Word</button>
+                    </form>
+                    
+                    <div class="word-list-container">
+                        <h4>Your Gender Word List:</h4>
+                        <ul id="gender-word-list" class="word-list"></ul>
+                        <div class="list-actions">
+                            <button id="clear-gender-list" class="secondary-button">Clear List</button>
+                            <button id="export-gender-list" class="secondary-button">Export List</button>
+                        </div>
+                    </div>
+                    
+                    <div class="csv-upload">
+                        <h4>Import from CSV:</h4>
+                        <p>Upload a CSV file with format: word,gender</p>
+                        <input type="file" id="gender-csv-upload" accept=".csv,.txt">
+                    </div>
+                </div>
+                
+                <!-- Plural Words Input (Group A) -->
+                <div id="plural-input-a" class="tab-content">
+                    <h3>Plural Words (Group A)</h3>
+                    <p>Enter words with their plural forms for Group A categories: no change, add -e, add -s</p>
+                    
+                    <form id="plural-a-form" class="input-form">
+                        <div class="form-group">
+                            <label for="plural-a-singular">Singular Form:</label>
+                            <input type="text" id="plural-a-singular" placeholder="e.g., Computer" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="plural-a-plural">Plural Form:</label>
+                            <input type="text" id="plural-a-plural" placeholder="e.g., Computer" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="plural-a-category">Category:</label>
+                            <select id="plural-a-category" required>
+                                <option value="no-change">No Change</option>
+                                <option value="add-e">Add -e</option>
+                                <option value="add-s">Add -s</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="primary-button">Add Word</button>
+                    </form>
+                    
+                    <div class="word-list-container">
+                        <h4>Your Plural Group A Word List:</h4>
+                        <ul id="plural-a-word-list" class="word-list"></ul>
+                        <div class="list-actions">
+                            <button id="clear-plural-a-list" class="secondary-button">Clear List</button>
+                            <button id="export-plural-a-list" class="secondary-button">Export List</button>
+                        </div>
+                    </div>
+                    
+                    <div class="csv-upload">
+                        <h4>Import from CSV:</h4>
+                        <p>Upload a CSV file with format: singular,plural,category</p>
+                        <input type="file" id="plural-a-csv-upload" accept=".csv,.txt">
+                    </div>
+                </div>
+                
+                <!-- Plural Words Input (Group B) -->
+                <div id="plural-input-b" class="tab-content">
+                    <h3>Plural Words (Group B)</h3>
+                    <p>Enter words with their plural forms for Group B categories: add -e + umlaut, add -er + umlaut, add -(e)n</p>
+                    
+                    <form id="plural-b-form" class="input-form">
+                        <div class="form-group">
+                            <label for="plural-b-singular">Singular Form:</label>
+                            <input type="text" id="plural-b-singular" placeholder="e.g., Student" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="plural-b-plural">Plural Form:</label>
+                            <input type="text" id="plural-b-plural" placeholder="e.g., Studenten" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="plural-b-category">Category:</label>
+                            <select id="plural-b-category" required>
+                                <option value="add-e-umlaut">Add -e + umlaut</option>
+                                <option value="add-er-umlaut">Add -er + umlaut</option>
+                                <option value="add-en">Add -(e)n</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="primary-button">Add Word</button>
+                    </form>
+                    
+                    <div class="word-list-container">
+                        <h4>Your Plural Group B Word List:</h4>
+                        <ul id="plural-b-word-list" class="word-list"></ul>
+                        <div class="list-actions">
+                            <button id="clear-plural-b-list" class="secondary-button">Clear List</button>
+                            <button id="export-plural-b-list" class="secondary-button">Export List</button>
+                        </div>
+                    </div>
+                    
+                    <div class="csv-upload">
+                        <h4>Import from CSV:</h4>
+                        <p>Upload a CSV file with format: singular,plural,category</p>
+                        <input type="file" id="plural-b-csv-upload" accept=".csv,.txt">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gender Exercise Section -->
+            <section id="gender-exercise-section" class="section">
+                <h2>Gender Exercise</h2>
+                <div class="exercise-container">
+                    <div class="word-display" id="gender-word-display">
+                        <div class="word-card" draggable="true" id="current-gender-word"></div>
+                    </div>
+                    
+                    <div class="drop-zones">
+                        <div class="drop-zone" data-gender="der">
+                            <h3>der</h3>
+                            <div class="drop-target" id="drop-der"></div>
+                        </div>
+                        <div class="drop-zone" data-gender="die">
+                            <h3>die</h3>
+                            <div class="drop-target" id="drop-die"></div>
+                        </div>
+                        <div class="drop-zone" data-gender="das">
+                            <h3>das</h3>
+                            <div class="drop-target" id="drop-das"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="feedback-container" id="gender-feedback">
+                        <p class="feedback-message"></p>
+                        <button id="gender-next" class="primary-button">Next Word</button>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-stats">
+                            <span id="gender-progress">0/0</span>
+                            <span id="gender-score">Score: 0</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="gender-progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Plural Exercise Section -->
+            <section id="plural-exercise-section" class="section">
+                <h2>Plural Exercise</h2>
+                
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="plural-exercise-a">Group A</button>
+                    <button class="tab-button" data-tab="plural-exercise-b">Group B</button>
+                </div>
+                
+                <!-- Plural Exercise Group A -->
+                <div id="plural-exercise-a" class="tab-content active">
+                    <div class="exercise-container">
+                        <div class="word-display" id="plural-a-word-display">
+                            <div class="word-card" draggable="true" id="current-plural-a-word"></div>
+                        </div>
+                        
+                        <div class="drop-zones">
+                            <div class="drop-zone" data-category="no-change">
+                                <h3>No Change</h3>
+                                <div class="drop-target" id="drop-no-change"></div>
+                            </div>
+                            <div class="drop-zone" data-category="add-e">
+                                <h3>Add -e</h3>
+                                <div class="drop-target" id="drop-add-e"></div>
+                            </div>
+                            <div class="drop-zone" data-category="add-s">
+                                <h3>Add -s</h3>
+                                <div class="drop-target" id="drop-add-s"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="feedback-container" id="plural-a-feedback">
+                            <p class="feedback-message"></p>
+                            <button id="plural-a-next" class="primary-button">Next Word</button>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-stats">
+                                <span id="plural-a-progress">0/0</span>
+                                <span id="plural-a-score">Score: 0</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="plural-a-progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Plural Exercise Group B -->
+                <div id="plural-exercise-b" class="tab-content">
+                    <div class="exercise-container">
+                        <div class="word-display" id="plural-b-word-display">
+                            <div class="word-card" draggable="true" id="current-plural-b-word"></div>
+                        </div>
+                        
+                        <div class="drop-zones">
+                            <div class="drop-zone" data-category="add-e-umlaut">
+                                <h3>Add -e + umlaut</h3>
+                                <div class="drop-target" id="drop-add-e-umlaut"></div>
+                            </div>
+                            <div class="drop-zone" data-category="add-er-umlaut">
+                                <h3>Add -er + umlaut</h3>
+                                <div class="drop-target" id="drop-add-er-umlaut"></div>
+                            </div>
+                            <div class="drop-zone" data-category="add-en">
+                                <h3>Add -(e)n</h3>
+                                <div class="drop-target" id="drop-add-en"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="feedback-container" id="plural-b-feedback">
+                            <p class="feedback-message"></p>
+                            <button id="plural-b-next" class="primary-button">Next Word</button>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-stats">
+                                <span id="plural-b-progress">0/0</span>
+                                <span id="plural-b-score">Score: 0</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="plural-b-progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Wortschatz | <a href="#" id="reset-data">Reset All Data</a></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
